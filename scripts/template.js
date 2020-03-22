@@ -3,7 +3,7 @@ module.exports = {
         return `<template>
     <div class="${componentName}">
         ${componentName}组件
-</div>
+    </div>
 </template>
 <script>
 export default {

@@ -9,15 +9,13 @@ const { vueTemplate } = require('./template');
 
 // 生成文件
 const generateFile = (path,data) => {
-    if(fs.existsSync(path)){
-        errorLog(`${path}文件已经存在`);
-        return;
-    }
-    return new Promise((resolve,reject)=>{
+  return new Promise((resolve,reject)=>{
+        if(fs.existsSync(path)){
+            reject(`${path}文件已经存在`);
+        }
         fs.writeFile(path,data,'utf8',err=>{
             if(err){
-                errorLog(err.message);
-                reject(err);
+                reject(err.message);
             }else{
                 resolve(true);
             }
@@ -25,72 +23,65 @@ const generateFile = (path,data) => {
     })
 }
 
-// 判断文件名以及路径
+// 拆分文件名以及路径
 const splitFileNameAndPath = (name) => {
-  // const inputArr = 
+    let inputArr = name.split('/');
+    let fileName = inputArr[inputArr.length - 1];
+    if(!fileName.endsWith('.vue')){
+      fileName += '.vue';
+    }
+    let filePathArr = inputArr.splice(0,inputArr.length - 1);
+    let filePath = filePathArr.join('/');
+    return [filePath,fileName];
 }
 
 log('请输入要生成的组件名称、如需生成全局组件，请加 global/ 前缀');
 
-let componentName = ''
 process.stdin.on('data', async chunk => {
-  const inputName = String(chunk).trim().toString()
+    const inputName = String(chunk).trim().toString()
+    const fileInfo = splitFileNameAndPath(inputName);
+    /**
+     * 组件目录路径
+     */
+    const componentDirectory = resolve('../src/components', fileInfo[0])
 
-  /**
-   * 组件目录路径
-   */
-  const componentDirectory = resolve('../src/components', inputName)
-
-  /**
-   * vue组件路径
-   */
-  const componentVueName = resolve(componentDirectory, 'main.vue')
-
-  const hasComponentDirectory = fs.existsSync(componentDirectory)
-  if (hasComponentDirectory) {
-    errorLog(`${inputName}组件目录已存在，请重新输入`)
-    return
-  } else {
+    /**
+     * vue组件路径
+     */
+    const componentVueName = resolve(componentDirectory, `${fileInfo[1]}`)
     log(`正在生成 component 目录 ${componentDirectory}`)
     await dotExistDirectoryCreate(componentDirectory)
-  }
-  try {
-    if (inputName.includes('/')) {
-      const inputArr = inputName.split('/')
-      componentName = inputArr[inputArr.length - 1]
-    } else {
-      componentName = inputName
+    try {
+        log(`正在生成 vue 文件 ${componentVueName}`)
+        await generateFile(componentVueName, vueTemplate(fileInfo[1]))
+        successLog('生成成功')
+    } catch (e) {
+        errorLog(e)
     }
-    log(`正在生成 vue 文件 ${componentVueName}`)
-    await generateFile(componentVueName, vueTemplate(componentName))
-    successLog('生成成功')
-  } catch (e) {
-    errorLog(e.message)
-  }
 
-  process.stdin.emit('end')
+    process.stdin.emit('end')
 })
 process.stdin.on('end', () => {
-  log('exit')
-  process.exit()
+    log('exit')
+    process.exit()
 })
 function dotExistDirectoryCreate (directory) {
-  return new Promise((resolve) => {
-    mkdirs(directory, function () {
-      resolve(true)
+    return new Promise((resolve) => {
+      mkdirs(directory,()=>{
+        resolve(true)
+      })
     })
-  })
 }
 
 // 递归创建目录
 function mkdirs (directory, callback) {
-  var exists = fs.existsSync(directory)
-  if (exists) {
-    callback()
-  } else {
-    mkdirs(path.dirname(directory), function () {
-      fs.mkdirSync(directory)
-      callback()
-    })
-  }
+    let exists = fs.existsSync(directory);
+    if (exists) {
+        callback()
+    } else {
+        mkdirs(path.dirname(directory),()=>{
+            fs.mkdirSync(directory)
+            callback()
+        })
+    }
 }
