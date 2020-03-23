@@ -6,7 +6,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "start": "npm run serve",
-    "new:comp": "node ./scripts/generateComponent"
+    "new:comp": "node ./scripts/generateComponent",
+    "new:view": "node ./scripts/generateView"
   },
   "dependencies": {
     "core-js": "^3.6.4",

@@ -32,7 +32,7 @@ const splitFileNameAndPath = (name) => {
     return [filePath,fileName];
 }
 
-log('请输入要生成的组件名称、如需生成全局组件，请加 global/ 前缀');
+log('请输入要生成的页面组件名称，会生成在 views/目录下');
 
 process.stdin.on('data', async chunk => {
     const inputName = String(chunk).trim().toString();
@@ -44,17 +44,17 @@ process.stdin.on('data', async chunk => {
     /**
      * 组件目录路径
      */
-    const componentDirectory = resolve('../src/components', fileInfo[0]);
+    const viewDirectory = resolve('../src/views', fileInfo[0]);
 
     /**
      * vue组件路径
      */
-    const componentVueName = resolve(componentDirectory, fileName);
-    log(`正在生成 component 目录 ${componentDirectory}`);
-    await dotExistDirectoryCreate(componentDirectory);
+    const viewVueName = resolve(viewDirectory, fileName);
+    log(`正在生成目录 ${viewDirectory}`);
+    await dotExistDirectoryCreate(viewDirectory);
     try {
-        log(`正在生成 vue 文件 ${componentVueName}`);
-        await generateFile(componentVueName, vueTemplate(fileInfo[1]));
+        log(`正在生成 vue 文件 ${viewVueName}`);
+        await generateFile(viewVueName, vueTemplate(fileInfo[1]));
         successLog('生成成功');
     } catch (e) {
         errorLog(e);
