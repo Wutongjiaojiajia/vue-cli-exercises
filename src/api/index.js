@@ -34,6 +34,15 @@ const noAuthCallback = (info) => {
     });
 }
 
+// 接口错误提示
+const errorCallback = (info) => {
+    MessageBox.alert(info, {
+        showClose: false,
+        confirmButtonText: "确定",
+        customClass: "alertFailure",
+    });
+}
+
 const req = ({ baseUrl, method, url, params, timeout, isOriginalGET}) => {
     let options={
         url: env[baseUrl] + url,
@@ -43,7 +52,8 @@ const req = ({ baseUrl, method, url, params, timeout, isOriginalGET}) => {
         isOriginalGET: isOriginalGET, 
         logoutCallback: logoutCallback,
         changeJwtCallback: changeJwtCallback,
-        noAuthCallback: noAuthCallback
+        noAuthCallback: noAuthCallback,
+        errorCallback:errorCallback
     };
 
     return http(options);

@@ -30,9 +30,9 @@ const http = ({
     logoutCallback,
     changeJwtCallback,
     noAuthCallback,
+    errorCallback,
     responseType,
     extraConfig,
-    errorHandler,
     isSecret
 }) => {
     // 用户退出登录
@@ -104,8 +104,16 @@ const http = ({
         },
         error => {
             // 异常处理操作，用于上报到 Sentry ---20191224/v0.0.5
-            if(!!errorHandler) {
-                errorHandler(error)
+            // 断网 或者 请求超时 状态
+            if (!error.response) {
+                // 请求超时状态
+                if (error.message.includes('timeout')) {
+                    errorCallback('请求超时，请检查网络是否连接正常');
+                } else {
+                // 可以展示断网组件
+                    errorCallback('请求失败，请检查网络是否已连接');
+                }
+                return
             }
             return Promise.reject(error);
         }
