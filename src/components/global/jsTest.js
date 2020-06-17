@@ -16,7 +16,7 @@ export default {
     },
     render() {
         return(
-            <p>jsTest</p>
+            <button>发射火箭</button>
         )
     },
 }
